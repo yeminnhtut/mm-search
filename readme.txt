@@ -18,4 +18,6 @@ With MM Search, users can search with both encoding formats.
 
 == For more support, feedbacks and issues ==
 
+https://github.com/ymhtut/mm-search/issues
+
 
