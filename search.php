@@ -13,34 +13,36 @@ Author URI: https://www.facebook.com/iamyeminhtut
 License: WTFPL
 */
 
-include( plugin_dir_path( __FILE__ ) . 'Rabbit.php');
+if (!class_exists('Rabbit')) {
+    include( plugin_dir_path( __FILE__ ) . 'Rabbit.php');
+}
 
 define( 'MM_SEARCH_DIR' , plugin_dir_path( __FILE__ ));
 
 define( 'MM_SEARCH_ADMIN_DIR', MM_SEARCH_DIR . '/admin');
 
-define( 'OPTION_WRITTEN_FONT', 'option_written_font');
-define( 'OPTION_ZAWGYI', 'Zawgyi');
-define( 'OPTION_UNICODE', 'Unicode');
+define( 'MM_SEARCH_OPTION_WRITTEN_FONT', 'option_written_font');
+define( 'MM_SEARCH_OPTION_ZAWGYI', 'Zawgyi');
+define( 'MM_SEARCH_OPTION_UNICODE', 'Unicode');
 
 define( 'MM_SEARCH_VERSION', '1.0');
 
-add_action('pre_get_posts','alter_query');
+add_action('pre_get_posts','mm_search_alter_query');
 
-function alter_query($query) {
+function mm_search_alter_query($query) {
 	//gets the global query var object
 	global $wp_query;
 
 	if($query->is_search()) {
 
 		$q = $query->get('s');
-		if(get_option(OPTION_WRITTEN_FONT, OPTION_ZAWGYI)==OPTION_ZAWGYI && !isZawgyi($q)) {
+		if(get_option(MM_SEARCH_OPTION_WRITTEN_FONT, MM_SEARCH_OPTION_ZAWGYI)==MM_SEARCH_OPTION_ZAWGYI && !mm_search_isZawgyi($q)) {
 			//is unicode
-			$q = Rabbit::unicode2zg($q);
+			$q = Rabbit::uni2zg($q);
 			$query->set('s', $q);	
-		}else if(get_option(OPTION_WRITTEN_FONT, OPTION_ZAWGYI)==OPTION_UNICODE && isZawgyi($q)){
+		}else if(get_option(MM_SEARCH_OPTION_WRITTEN_FONT, MM_SEARCH_OPTION_ZAWGYI)==MM_SEARCH_OPTION_UNICODE && mm_search_isZawgyi($q)){
 			//is zawgyi
-			$q = Rabbit::zawgyi2uni($q);
+			$q = Rabbit::zg2uni($q);
 			$query->set('s', $q);
 		}
 
@@ -49,7 +51,7 @@ function alter_query($query) {
 	}
 }
 
-function isZawgyi($str){
+function mm_search_isZawgyi($str){
 	//The following pattern is from `MyanmarZawgyiConverter.java` of `mmtext` library
 	//Credit ::  https://github.com/htoomyintnaung/mmtext
 	$pattern = '/[ဳဴၚၠ-႟]|ေ[ႏ႐]|ေ[ျၾ-ႄ]|[^က-အဩျ်ြွ]ေ|[^က-အဩေ]ျ|\s[ေျၾ-ႄ]|^[ေျၾ-ႄ]|္[^က-ဪ]|င္|ြ[ျၾ-ႄ]|ြ[်႐]|ွြ|ုု/u';
